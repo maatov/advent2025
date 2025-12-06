@@ -30,9 +30,8 @@ res = countFreshIngreds(freshs,ingreds)
 print('solution1',res)
 
 def unionoftwo(r1,r2):
-    #prereq r1 is starting more on the left of interval
-    s1,e1 = r1
-    s2,e2 = r2
+    s1,e1 = min(r1,r2)
+    s2,e2 = max(r1,r2)
     if s2<=e1+1:
         #intersects or 'touch'
         return [(s1,max(e1,e2))]
