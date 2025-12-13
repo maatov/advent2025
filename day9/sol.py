@@ -196,6 +196,7 @@ def evaluate(floordef,square):
 
 def findSquareInFloordef(floordef,squarelist):
     sl = squarelist[:]
+    sl.sort()
     sl.reverse()
     for item in sl:
         #evaluate square in floordef
