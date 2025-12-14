@@ -1,5 +1,10 @@
 import random
 
+"""
+ak to budem niekedy prerabat/opakovat tak netreba uchovavat kazdy riadok, 
+ ale iba riadky kde "sa nieco deje" cize riadky (y-suradnice) uzlov zo zadania
+"""
+
 def load(fname):
     with open(fname,'rt') as f:
         inp = []
@@ -44,6 +49,9 @@ def createPath(nodelist):
         node1 = node
     path += [ (nodelist[-1], nodelist[0] ) ]
     return path
+
+def getRelevantLineList(nodelist):
+    return sorted([x for x,y in nodelist])
 
 class LineDef:
     def __init__(self,linenum):
@@ -120,7 +128,6 @@ class FloorDef:
     def __init__(self):
         pass
         
-
 def getHline(f,t):
     (x,y),(xx,yy) = f,t
     return (min(y,yy),max(y,yy))
@@ -138,13 +145,14 @@ def addHline(fdef,num,f,t):
          fdef[num] = lf
     return fdef
 
-def addVline(fdef,f,t):
+def addVline(fdef,f,t,relevantLineSet):
     #asserting f[1]==t[1]
     if f[1]!=t[1]:
         raise Exception("assertion failed on points")
     pointy = f[1]
     linef,linet = getVline(f,t)
-    for i in range(linef,linet+1):
+    indexes = set(range(linef,linet+1)).intersection(relevantLineSet)
+    for i in indexes:
         try:
             fdef[i].add( pointy )
         except:
@@ -152,7 +160,7 @@ def addVline(fdef,f,t):
             tmp.add(pointy)
             fdef[i] = tmp
 
-def writefloordef(paths):
+def writefloordef(paths,relevantLineSet):
     floordef = dict()
     for path in paths:
         f,t = path
@@ -163,7 +171,7 @@ def writefloordef(paths):
             addHline(floordef,x,f,t)
         else:
             #vertical
-            addVline(floordef,f,t)
+            addVline(floordef,f,t,relevantLineSet)
     return floordef
 
 def fillFloor(floordef):
@@ -178,7 +186,7 @@ def fillFloor(floordef):
         tmp = linedef
     return floordef
 
-def evaluate(floordef,square):
+def evaluate(floordef,square,lineSet):
     #print('evaluating',square)
     value,e1,e2 = square
     x,y = e1
@@ -187,27 +195,38 @@ def evaluate(floordef,square):
     endx = max(x,xx)
     startd = min(y,yy)
     endd = max(y,yy)
-    midpoint = (endx-startx)//2    
-    for i in range(midpoint+1):
-        for fd in {floordef[startx+i],floordef[endx-i]}:
-            if not fd.isLineIn(startd,endd):
+    #print(square,len(indexes),indexes)
+    #one from top one from down ...
+    midp = (endx-startx) // 2
+    for i in range(midp):
+        i1 = startx+i
+        if i1 in lineSet:
+            if not fd[i1].isLineIn(startd,endd):
+                #print(square,'false at',i)
+                return False
+        i2 = endx-i
+        if i2 in lineSet:
+            if not fd[i2].isLineIn(startd,endd):
+                #print(square,'false at',-i-1)
                 return False
     return True
 
-def findSquareInFloordef(floordef,squarelist):
+def findSquareInFloordef(floordef,squarelist,lineSet):
     sl = squarelist[:]
     sl.sort()
     sl.reverse()
     for item in sl:
         #evaluate square in floordef
-        if evaluate(floordef,item):
+        if evaluate(floordef,item,lineSet):
             return item[0]
     return 0
 
+#
 outerpath = createPath(inp)
+relevantLineSet = set(getRelevantLineList(inp))
 
-fd = writefloordef(outerpath)
+fd = writefloordef(outerpath,relevantLineSet)
 fillFloor(fd)
 
-result = findSquareInFloordef(fd,sortedsqareas)
+result = findSquareInFloordef(fd,sortedsqareas,relevantLineSet)
 print('solution2',result)
