@@ -1,9 +1,3 @@
-import random
-
-"""
-ak to budem niekedy prerabat/opakovat tak netreba uchovavat kazdy riadok, 
- ale iba riadky kde "sa nieco deje" cize riadky (y-suradnice) uzlov zo zadania
-"""
 
 def load(fname):
     with open(fname,'rt') as f:
@@ -230,3 +224,4 @@ fillFloor(fd)
 
 result = findSquareInFloordef(fd,sortedsqareas,relevantLineSet)
 print('solution2',result)
+
